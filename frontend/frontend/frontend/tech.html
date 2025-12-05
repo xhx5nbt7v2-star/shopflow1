@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ShopFlow - Technician</title>
+  <style>
+    body { font-family: Arial; padding: 10px; background: #f7f7f7; }
+    .job { padding: 10px; background: white; margin: 10px 0; border-radius: 6px; }
+    button { margin: 5px; padding: 8px 12px; }
+  </style>
+</head>
+
+<body>
+<h2>Your Jobs</h2>
+<div id="jobs"></div>
+
+<script>
+const token = localStorage.getItem("token");
+const payload = JSON.parse(atob(token.split('.')[1]));
+const techName = payload.user;
+
+async function loadJobs() {
+  let res = await fetch("/api/ro/all");
+  let json = await res.json();
+  let list = json.repairs.filter(r => r.tech === techName);
+
+  let div = document.getElementById("jobs");
+  div.innerHTML = "";
+
+  list.forEach(r => {
+    div.innerHTML += `
+      <div class="job">
+        <strong>RO ${r.ro}</strong><br>
+        ${r.customer}<br>
+        ${r.vehicle}<br>
+        <br>
+        <button onclick="update(${r.id}, 'In Process')">Start</button>
+        <button onclick="update(${r.id}, 'Waiting on Parts')">Parts Hold</button>
+        <button onclick="update(${r.id}, 'Finished/Pick Up')">Complete</button>
+      </div>
+    `;
+  });
+}
+
+async function update(id, status) {
+  await fetch(`/api/ro/status/${id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status })
+  });
+}
+
+loadJobs();
+const ws = new WebSocket(`wss://${location.host}/ws`);
+ws.onmessage = () => loadJobs();
+</script>
+</body>
+</html>
