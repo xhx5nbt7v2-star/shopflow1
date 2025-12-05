@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ShopFlow Login</title>
+  <style>
+    body { font-family: Arial; background: #e9eef5; display: flex;
+           justify-content: center; align-items: center; height: 100vh; }
+    .box { background: white; padding: 30px; border-radius: 8px;
+           width: 300px; box-shadow: 0 0 10px rgba(0,0,0,0.15); }
+    input { width: 100%; padding: 10px; margin: 8px 0; }
+    button { width: 100%; padding: 10px; background: #007bff;
+             color:white; border: none; cursor: pointer; }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h2>ShopFlow Login</h2>
+    <input id="user" placeholder="Username">
+    <input id="pass" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <p id="msg" style="color:red;"></p>
+  </div>
+
+<script>
+async function login() {
+  let res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("user").value,
+      password: document.getElementById("pass").value
+    })
+  });
+
+  let json = await res.json();
+  if (json.error) {
+    document.getElementById("msg").innerText = json.error;
+    return;
+  }
+
+  localStorage.setItem("token", json.token);
+
+  const payload = JSON.parse(atob(json.token.split('.')[1]));
+
+  if (payload.role === "tech") location = "/tech.html";
+  else if (payload.role === "advisor") location = "/advisor.html";
+  else if (payload.role === "parts") location = "/parts.html";
+  else if (payload.role === "cashier") location = "/cashier.html";
+  else location = "/manager.html";
+}
+</script>
+
+</body>
+</html>
