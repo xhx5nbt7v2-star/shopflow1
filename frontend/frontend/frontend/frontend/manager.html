@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ShopFlow Manager</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .panel { background: #f3f3f3; padding: 20px; border-radius: 6px; margin-bottom: 20px; }
+    .kpi { font-size: 24px; }
+  </style>
+</head>
+
+<body>
+<h1>Manager Dashboard</h1>
+
+<div class="panel">
+  <h3>Shop KPIs</h3>
+  <div id="kpis" class="kpi"></div>
+</div>
+
+<div class="panel">
+  <h3>All Repair Orders</h3>
+  <div id="ros"></div>
+</div>
+
+<script>
+async function load() {
+  let res = await fetch("/api/ro/all");
+  let json = await res.json();
+  let rows = json.repairs;
+
+  // KPIs
+  let counts = {};
+  rows.forEach(r => counts[r.status] = (counts[r.status] || 0) + 1);
+
+  document.getElementById("kpis").innerHTML =
+    Object.keys(counts).map(s => `${s}: ${counts[s]}`).join("<br>");
+
+  // List ROs
+  let list = "";
+  rows.forEach(r => {
+    list += `
+      <div style="margin-bottom:10px;padding:10px;background:white">
+        <strong>${r.ro}</strong> - ${r.customer} (${r.vehicle})<br>
+        Tech: ${r.tech}<br>
+        Status: ${r.status}<br>
+      </div>
+    `;
+  });
+
+  document.getElementById("ros").innerHTML = list;
+}
+
+load();
+const ws = new WebSocket(`wss://${location.host}/ws`);
+ws.onmessage = () => load();
+</script>
+</body>
+</html>
