@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: shopflow
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn server:app --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:10000"
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shopflow-db
+          property: connectionString
+
+databases:
+  - name: shopflow-db
+    engine: postgres
+    plan: free
