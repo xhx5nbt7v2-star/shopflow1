@@ -44,10 +44,10 @@ async function login() {
   const payload = JSON.parse(atob(json.token.split('.')[1]));
 
   if (payload.role === "tech") location = "/tech.html";
-  else if (payload.role === "advisor") location = "/advisor.html";
-  else if (payload.role === "parts") location = "/parts.html";
-  else if (payload.role === "cashier") location = "/cashier.html";
-  else location = "/manager.html";
+else if (payload.role === "advisor") location = "/manager.html"; // advisor sees manager dashboard
+else if (payload.role === "cashier") location = "/manager.html"; // cashier sees manager dashboard
+else location = "/manager.html";
+
 }
 </script>
 
